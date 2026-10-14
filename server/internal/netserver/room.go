@@ -129,7 +129,9 @@ func (r *Room) rejoin(c *Client) bool {
 		return false
 	}
 	delete(r.away, c.player.ID)
-	r.members[c.id] = &member{c: c, slot: a.slot, ready: true}
+	// đang ở bước tải: chờ trình duyệt báo tải xong; trận đã chạy thì vào chơi luôn
+	r.members[c.id] = &member{c: c, slot: a.slot, ready: r.g.Phase != game.PhaseLoading}
+	log.Printf("ROOM %s %s vào lại trận", r.id, c.name)
 	r.srv.st.ClearReconnect(context.Background(), c.player.ID)
 	r.broadcastLocked(map[string]any{"t": "chat", "slot": -1, "text": c.name + " đã kết nối lại."})
 	r.broadcastRoomLocked()
@@ -147,6 +149,7 @@ func (r *Room) remove(c *Client, dropped bool) {
 	inMatch := r.g != nil && (r.g.Phase == game.PhaseLoading || r.g.Phase == game.PhaseCountdown || r.g.Phase == game.PhasePlaying || r.g.Phase == game.PhaseIntermission)
 	switch {
 	case inMatch && dropped:
+		log.Printf("ROOM %s %s rớt kết nối (giữ chỗ)", r.id, c.name)
 		// giữ Goku trong trận, chờ người chơi kết nối lại
 		r.away[c.player.ID] = &away{slot: m.slot, name: c.name, until: time.Now().Add(reconnectGrace), player: c.player.ID}
 		r.srv.st.SetReconnect(context.Background(), c.player.ID, store.Reconnect{Room: r.id, Slot: m.slot}, reconnectGrace)
@@ -202,10 +205,12 @@ func (r *Room) input(c *Client, msg inMsg) {
 		r.loadUntil = time.Now().Add(loadTimeout)
 		r.inputs = nil
 		r.saved = false
+		log.Printf("ROOM %s bắt đầu tải, %d người", r.id, len(r.members))
 		r.broadcastRoomLocked()
 		return
 	case "ready":
 		m.ready = true
+		log.Printf("ROOM %s %s đã tải xong", r.id, c.name)
 		return
 	case "cam": // vùng camera: tâm (x, y), bán kính c
 		if !math.IsNaN(msg.X+msg.Y+msg.C) && !math.IsInf(msg.X+msg.Y+msg.C, 0) {
@@ -334,7 +339,16 @@ func (r *Room) stepLocked(dt float64) {
 		for _, m := range r.members {
 			all = all && m.ready
 		}
+		// phòng trống (người duy nhất vừa rớt mạng lúc đang tải): chờ họ vào lại
+		all = all && len(r.members) > 0
 		if all || time.Now().After(r.loadUntil) {
+			waiting := []string{}
+			for _, m := range r.members {
+				if !m.ready {
+					waiting = append(waiting, m.c.name)
+				}
+			}
+			log.Printf("ROOM %s bắt đầu trận (đủ người: %v, còn chờ: %v)", r.id, all, waiting)
 			g.Start()
 		}
 	}

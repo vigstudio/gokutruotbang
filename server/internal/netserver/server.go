@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"mime"
@@ -137,6 +138,22 @@ func (s *Server) Handler() http.Handler {
 		s.mu.Unlock()
 		w.Header().Set("Cache-Control", "no-store")
 		writeJSON(w, metrics.report(rooms, clients, games))
+	})
+	// lỗi phía trình duyệt (để chẩn đoán lỗi chỉ xảy ra trên máy người chơi)
+	mux.HandleFunc("/api/clientlog", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || !clientLogLimit.allow(clientIP(r)) {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		body, _ := io.ReadAll(io.LimitReader(r.Body, 4096))
+		msg := strings.Map(func(c rune) rune {
+			if c == '\n' || c == '\r' {
+				return ' '
+			}
+			return c
+		}, string(body))
+		log.Printf("CLIENTLOG %s %s", clientIP(r), msg)
+		w.WriteHeader(http.StatusNoContent)
 	})
 	mux.HandleFunc("/api/items", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache")
@@ -463,6 +480,9 @@ func (s *Server) startSession(c *Client, p store.Player, token string) {
 	if old != nil && old != c {
 		old.sendJSON(map[string]any{"t": "kicked", "text": "Tài khoản vừa đăng nhập ở nơi khác"})
 		old.close()
+		// gỡ kết nối cũ khỏi phòng ngay (giữ chỗ nếu đang trong trận) để bước
+		// "vào lại trận" bên dưới thấy được - không chờ server tự phát hiện socket cũ đã đóng
+		s.detachFrom(old, true)
 	}
 	c.sendJSON(map[string]any{"t": "session", "token": token, "playerId": p.ID, "name": p.Name})
 
@@ -584,4 +604,45 @@ func (s *Server) roomList() []roomInfo {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].seq < out[j].seq })
 	return out
+}
+
+// clientIP: IP người gửi (sau nginx thì lấy X-Real-IP / X-Forwarded-For).
+func clientIP(r *http.Request) string {
+	if ip := r.Header.Get("X-Real-IP"); ip != "" {
+		return ip
+	}
+	if f := r.Header.Get("X-Forwarded-For"); f != "" {
+		return strings.TrimSpace(strings.Split(f, ",")[0])
+	}
+	h, _, _ := strings.Cut(r.RemoteAddr, ":")
+	return h
+}
+
+// ipLimiter: giới hạn số lần ghi log lỗi mỗi IP (tối đa 20 lần / phút).
+type ipLimiter struct {
+	mu   sync.Mutex
+	hits map[string][]time.Time
+}
+
+var clientLogLimit = &ipLimiter{hits: map[string][]time.Time{}}
+
+func (l *ipLimiter) allow(ip string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	now := time.Now()
+	kept := l.hits[ip][:0]
+	for _, t := range l.hits[ip] {
+		if now.Sub(t) < time.Minute {
+			kept = append(kept, t)
+		}
+	}
+	if len(kept) >= 20 {
+		l.hits[ip] = kept
+		return false
+	}
+	l.hits[ip] = append(kept, now)
+	if len(l.hits) > 5000 { // tránh phình bộ nhớ
+		l.hits = map[string][]time.Time{}
+	}
+	return true
 }

@@ -10,6 +10,7 @@ import type { AbilityDef, GameEvent } from '../types'
 import { getQuality, type Quality } from '../game3d/quality'
 import InventoryBar from './InventoryBar.vue'
 import MobileControls from './MobileControls.vue'
+import { reportError } from '../clientlog'
 import SoundButton from './SoundButton.vue'
 import { music, setSfxVolume, setVolume } from '../audio/music'
 import { playSfx, preloadSfx, setSlide, spatial, type SfxId } from '../audio/sfx'
@@ -181,6 +182,7 @@ function resize() {
 const loadFailed = ref(false)
 function recover(reason: unknown) {
   console.error('[goku] lỗi, tải lại trang:', reason)
+  reportError('recover', reason, { step: loadStep.value, pct: loadPct.value, ping: store.ping })
   let tries: number[] = []
   try {
     tries = JSON.parse(sessionStorage.getItem('goku.reloads') ?? '[]').filter((t: number) => Date.now() - t < 120000)
@@ -198,8 +200,9 @@ function recover(reason: unknown) {
   } catch {
     /* bỏ qua */
   }
-  loadStep.value = 'Gặp lỗi khi tải, đang thử lại…'
-  setTimeout(() => location.reload(), 1200)
+  const why = reason instanceof Error ? reason.message : String(reason)
+  loadStep.value = 'Gặp lỗi khi tải (' + why.slice(0, 80) + '), đang thử lại…'
+  setTimeout(() => location.reload(), 3500)
 }
 function reloadPage() {
   try {
