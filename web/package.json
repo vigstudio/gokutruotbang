@@ -1,0 +1,24 @@
+{
+  "name": "goku-truot-bang-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@types/three": "^0.169.0",
+    "gl-matrix": "^3.4.3",
+    "three": "^0.169.0",
+    "vue": "3.5.17",
+    "war3-model": "^4.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "5.2.4",
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vue-tsc": "2.2.10"
+  }
+}

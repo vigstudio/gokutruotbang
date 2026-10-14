@@ -1,0 +1,18 @@
+# phụ thuộc + bản build
+web/node_modules/
+web/dist/
+*.exe
+
+# cấu hình bí mật
+.env
+
+# file bản đồ gốc (có nội dung import của bên thứ ba) - dữ liệu cần thiết đã trích vào server/internal/mapdata/map.json
+*.w3x
+
+# model Goku cho trang chủ tải từ Sketchfab: không phân phối lại, đặt thủ công (xem README)
+web/public/assets/menu/*.glb
+
+# nhạc trích từ map gốc (có bản quyền, game không dùng)
+web/public/assets/war3mapImported/*.mp3
+web/public/assets/war3mapImported/*.WAV
+web/public/assets/war3mapImported/*.wav

@@ -1,0 +1,7 @@
+**/node_modules
+web/dist
+.env
+*.w3x
+docs
+*.exe
+.git

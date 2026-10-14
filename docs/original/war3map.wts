@@ -1,0 +1,544 @@
+﻿STRING 1
+{
+Goku truot bang v2.2
+}
+STRING 2
+{
+11 vietnghiavnn
+}
+STRING 3
+{
+Goku truot bang- Giai tri
+                                                                               
+}
+STRING 4
+{
+Vietnghiavnn
+}
+STRING 5
+{
+vietnghiavnn
+}
+STRING 6
+{
+Goku truot bang v2.2
+}
+STRING 13
+{
+|cffFFFF00IMPORTANT:|r |cffff0800There seems to be a "bug" of sorts which may make your ninja unable to move for some reason. If this happens, click on someone else's ninja and then click on your own again. This has fixed the "bug" everytime.|r
+}
+STRING 19
+{
+Goku truot bang !!!!! Chào mung da dên  !!!
+}
+STRING 59
+{
+Purchase Ultra Sobi Mask
+}
+STRING 60
+{
+Ultra Sobi Mask
+}
+STRING 61
+{
+Increases the Hero's rate of mana regeneration by 100% when worn.
+}
+STRING 62
+{
+This mask increases the mana regeneration rate of heroes by 100% when worn.
+}
+STRING 63
+{
+Socks of Ultra Speed
+}
+STRING 64
+{
+This is three times better than Boots of Speed
+}
+STRING 65
+{
+Purchase Socks of |cffffcc00U|rltra Speed
+}
+STRING 66
+{
+One of these socks are three times better than Boots of Speed
+}
+STRING 67
+{
+This item is twice as good as Pendant of Energy
+}
+STRING 68
+{
+ItemZone
+}
+STRING 122
+{
+|cffffff00Thua! túc là không co thang|r
+}
+STRING 136
+{
+WIN !!! Ban gioi thât!!!!!
+}
+STRING 155
+{
+Krusty Krab
+}
+STRING 157
+{
+Sponges Home
+}
+STRING 165
+{
+Learn |cffffcc00B|rite of Freeze - [|cffffcc00Level %d|r]
+}
+STRING 166
+{
+Bite the Krab by the strong ice . |n|n|cffffcc00Level 1|r - <AEer,DataA1> damage per second for <AEer,Dur1> seconds. |n|cffffcc00Level 2|r - <AEer,DataA2> damage per second for <AEer,Dur2> seconds. |n|cffffcc00Level 3|r - <AEer,DataA3> damage per second for <AEer,Dur3> seconds.
+}
+STRING 167
+{
+Bite the enemy by froze and disarming a target enemy unit for <AEer,Dur1> seconds, and dealing <AEer,DataA1> damage per second.
+}
+STRING 168
+{
+Bite the enemy by froze and disarming a target enemy unit for <AEer,Dur2> seconds, and dealing <AEer,DataA2> damage per second.
+}
+STRING 169
+{
+Bite the enemy by froze and disarming a target enemy unit for <AEer,Dur3> seconds, and dealing <AEer,DataA3> damage per second.
+}
+STRING 170
+{
+|cffffcc00B|rite of Freeze - [|cffffcc00Level 1|r]
+}
+STRING 171
+{
+|cffffcc00B|rite of Freeze - [|cffffcc00Level 2|r]
+}
+STRING 172
+{
+|cffffcc00B|rite of Freeze - [|cffffcc00Level 3|r]
+}
+STRING 173
+{
+B
+}
+STRING 174
+{
+B
+}
+STRING 227
+{
+Q
+}
+STRING 228
+{
+Q
+}
+STRING 255
+{
+R
+}
+STRING 256
+{
+R
+}
+STRING 257
+{
+E
+}
+STRING 258
+{
+E
+}
+STRING 276
+{
+Easier meditation/Łatwiejsza medytacja
+}
+STRING 278
+{
+Easier meditation/Łatwiejsza medytacja
+}
+STRING 293
+{
+Vòng 2.Chúc may mán!
+}
+STRING 294
+{
+Vòng 3,Coi chùng lên bàn thò ông bà !
+}
+STRING 295
+{
+Vòng cuôi,Hay dên vòng này là gioi,nhung dung lo là coi chung chêt
+}
+STRING 296
+{
+Rông 
+}
+STRING 297
+{
+Rông gion mat
+}
+STRING 298
+{
+Goku
+}
+STRING 299
+{
+Kakalot
+}
+STRING 300
+{
+Dân cu hành tinh Xayda
+}
+STRING 301
+{
+Trôi dat dên trai dât
+}
+STRING 302
+{
+Rông dai ca
+}
+STRING 303
+{
+Dai ca
+}
+STRING 305
+{
+Goku truot tuyet thu gian!!!!!
+}
+STRING 306
+{
+Goku 1
+}
+STRING 307
+{
+Goku 2
+}
+STRING 308
+{
+Goku 3
+}
+STRING 309
+{
+Goku 4
+}
+STRING 310
+{
+Goku 5
+}
+STRING 311
+{
+Goku 6
+}
+STRING 312
+{
+Goku 7
+}
+STRING 313
+{
+Goku 8
+}
+STRING 314
+{
+Goku 9
+}
+STRING 315
+{
+Goku 10
+}
+STRING 316
+{
+Goku 11
+}
+STRING 317
+{
+Rông Quây
+}
+STRING 319
+{
+Goku
+}
+STRING 320
+{
+Goku 1
+}
+STRING 321
+{
+Goku 2
+}
+STRING 322
+{
+Goku 3
+}
+STRING 323
+{
+Goku 4
+}
+STRING 324
+{
+Goku 5
+}
+STRING 325
+{
+Goku 6
+}
+STRING 326
+{
+Goku 7
+}
+STRING 327
+{
+Goku 8
+}
+STRING 328
+{
+Goku 9
+}
+STRING 329
+{
+Goku 11
+}
+STRING 330
+{
+Goku 10
+}
+STRING 331
+{
+Goku Zone
+}
+STRING 332
+{
+Goku Boots
+}
+STRING 333
+{
+Relikt Goku
+}
+STRING 334
+{
+(A)
+}
+STRING 335
+{
+A
+}
+STRING 336
+{
+A
+}
+STRING 337
+{
+(A)
+}
+STRING 338
+{
+(A)
+}
+STRING 339
+{
+(Q)
+}
+STRING 340
+{
+(Q)
+}
+STRING 341
+{
+(Q)
+}
+STRING 342
+{
+(R)
+}
+STRING 343
+{
+(R)
+}
+STRING 344
+{
+(R)
+}
+STRING 345
+{
+(E)
+}
+STRING 346
+{
+(E)
+}
+STRING 347
+{
+(E)
+}
+STRING 348
+{
+(W)
+}
+STRING 349
+{
+(W)
+}
+STRING 350
+{
+(W)
+}
+STRING 351
+{
+Sra
+}
+STRING 352
+{
+Sra
+}
+STRING 353
+{
+Sra
+}
+STRING 354
+{
+Ato
+}
+STRING 355
+{
+(Q)
+}
+STRING 356
+{
+(Q)
+}
+STRING 357
+{
+M
+}
+STRING 358
+{
+U
+}
+STRING 359
+{
+S
+}
+STRING 360
+{
+P
+}
+STRING 361
+{
+B
+}
+STRING 362
+{
+R
+}
+STRING 363
+{
+R
+}
+STRING 364
+{
+Nhac nên (NEW) :Kungfu Panda - Brain
+Nêu thây thang nào ngua mat:
+Host dung Kick : -kick p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
+Skill New and Hotkey Easy User
+}
+STRING 365
+{
+(R)
+}
+STRING 366
+{
+(E)
+}
+STRING 367
+{
+(W)
+}
+STRING 369
+{
+Bi Kick oi`!
+}
+STRING 370
+{
+Bi Kick oi`!
+}
+STRING 371
+{
+Bi Kick oi`!
+}
+STRING 372
+{
+Bi Kick oi`!
+}
+STRING 373
+{
+Bi Kick oi`!
+}
+STRING 374
+{
+Bi Kick oi`!
+}
+STRING 375
+{
+Bi Kick oi`!
+}
+STRING 376
+{
+Bi Kick oi`!
+}
+STRING 377
+{
+Bi Kick oi`!
+}
+STRING 379
+{
+Bi Kick oi`!
+}
+STRING 380
+{
+Cargo Hold (Tank)
+}
+STRING 381
+{
+%s - Level %d
+}
+STRING 382
+{
+Nhuc that!
+}
+STRING 383
+{
+Nhuc nhat!
+}
+STRING 384
+{
+Continue |CFFFFFFFFO|Rbserving
+}
+STRING 385
+{
+|CFFFED312Left-Click to Use|R
+}
+STRING 386
+{
+%s chò thàng khi gió này. <%u Phút>
+}
+STRING 387
+{
+%s me nó tu dung dung.
+}
+STRING 388
+{
+%s dã bi giet.
+}
+STRING 389
+{
+%s dis me nó ra rôi.
+}
+STRING 390
+{
+%s WIN!!!!!!.
+}
+STRING 391
+{
+|Cff00ff00Goku truot bang
+}

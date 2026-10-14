@@ -1,0 +1,182 @@
+/* Hệ thống giao diện (tham khảo WC3 Reforged): nền tối mờ, viền chỉ vàng
+   mảnh, góc chữ L, tiêu đề Philosopher vàng, nội dung Be Vietnam Pro.
+   Trang trí tiết chế: tuyết đọng + xích chỉ dùng cho khung menu chính (.hang). */
+:root {
+  --gold: #f0c860;
+  --gold-soft: #d9bd7a;
+  --btn-text: #f3e3a6;
+  --text: #e4e1d8;
+  --muted: #9aa2b1;
+  --green: #4ce34c;
+  --red: #ff5a48;
+  --line: rgba(201, 162, 77, 0.6);
+  --line-dim: rgba(201, 162, 77, 0.22);
+  --panel: linear-gradient(180deg, rgba(24, 28, 37, 0.95), rgba(11, 13, 18, 0.95));
+  --title: 'Philosopher', 'Palatino Linotype', Georgia, serif;
+  --body: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;
+  /* giữ tên biến cũ cho các thành phần đang dùng */
+  --bronze-hi: #e8c66e;
+  --bronze: #c9a24d;
+  --bronze-lo: #5a4720;
+  --metal-noise: linear-gradient(transparent, transparent);
+  --metal-grain: linear-gradient(transparent, transparent);
+  --snow-cap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='64' viewBox='0 0 420 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.6' stop-color='%23e9f0f8'/%3E%3Cstop offset='1' stop-color='%23a9b9cf'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 30 C14 22 30 21 44 25 C58 17 80 15 96 22 C110 18 124 20 134 26 C150 16 176 15 192 23 C206 19 220 21 230 27 C246 18 270 17 286 24 C300 20 314 22 324 27 C340 18 364 18 380 24 C394 20 408 22 420 27 L420 40 L0 40 Z' fill='url(%23g)'/%3E%3C/svg%3E");
+  --chain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='48' viewBox='0 0 26 48'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%230d0e10'/%3E%3Cstop offset='.4' stop-color='%23a7adb6'/%3E%3Cstop offset='.6' stop-color='%23555b64'/%3E%3Cstop offset='1' stop-color='%230d0e10'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='10' y='19' width='6' height='29' rx='3' fill='url(%23a)'/%3E%3Cellipse cx='13' cy='12' rx='8' ry='11' fill='none' stroke='%23050506' stroke-width='6'/%3E%3Cellipse cx='13' cy='12' rx='8' ry='11' fill='none' stroke='url(%23a)' stroke-width='4'/%3E%3C/svg%3E");
+  font-family: var(--body);
+  font-size: 14px;
+  color: var(--text);
+  background: #03060b;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { margin: 0; height: 100%; }
+body { overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+.gold { color: var(--gold); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); }
+.title-font { font-family: var(--title); }
+.muted { color: var(--muted); }
+
+/* ------------------------------------------------------------ khung */
+.iron, .wc-frame {
+  position: relative;
+  padding: 18px 22px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 32px rgba(0, 0, 0, 0.45),
+    0 14px 34px rgba(0, 0, 0, 0.6);
+}
+/* góc chữ L mảnh */
+.iron::before, .wc-frame::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  --c: #e8c66e;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 14px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 14px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 14px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 14px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 2px 14px no-repeat;
+}
+.iron > h2, .wc-frame > h2, .wc-heading {
+  font-family: var(--title);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  margin: 0 0 14px;
+  padding-bottom: 9px;
+  color: var(--gold);
+  border-bottom: 1px solid var(--line-dim);
+  text-shadow: 0 1px 2px #000;
+}
+.wc-inset, .well {
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* trang trí Frozen Throne: chỉ khung menu chính */
+.hang { position: relative; }
+.hang::before {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: calc(100% - 4px);
+  height: 140px;
+  pointer-events: none;
+  background:
+    var(--chain) left top / 26px 48px repeat-y,
+    var(--chain) right top / 26px 48px repeat-y;
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.6));
+}
+.hang > .snowy::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: -18px;
+  height: 40px;
+  pointer-events: none;
+  background: var(--snow-cap) repeat-x;
+  background-size: 420px 64px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
+
+/* ------------------------------------------------------------ nút */
+button { font: inherit; cursor: pointer; }
+.tft-btn, .wc-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 18px;
+  font-family: var(--title);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--btn-text);
+  text-shadow: 0 1px 2px #000;
+  background: linear-gradient(180deg, #1f2d4f 0%, #131c35 55%, #0d1426 100%);
+  border: 1px solid var(--line);
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 14px rgba(0, 0, 0, 0.45);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.tft-btn:hover:not(:disabled), .wc-btn:hover:not(:disabled) {
+  color: #fff7d6;
+  border-color: #f0d080;
+  background: linear-gradient(180deg, #2a3c68 0%, #1a2747 55%, #121b33 100%);
+}
+.tft-btn:active:not(:disabled), .wc-btn:active:not(:disabled) { transform: translateY(1px); }
+.tft-btn:disabled, .wc-btn:disabled { color: #7d7f88; border-color: rgba(201, 162, 77, 0.25); background: linear-gradient(180deg, #1b1e26, #111318); cursor: default; }
+.wc-btn.small, .tft-btn.small { min-height: 30px; padding: 4px 12px; font-size: 14px; }
+
+/* ------------------------------------------------------------ ô nhập */
+.wc-input, .tft-input {
+  font: inherit;
+  color: #fff;
+  caret-color: var(--gold);
+  background: #07090d;
+  border: 1px solid #353b47;
+  padding: 9px 11px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.wc-input:focus, .tft-input:focus { border-color: var(--bronze); }
+.wc-label { font-size: 13px; font-weight: 600; color: var(--gold-soft); margin-bottom: 5px; display: block; }
+.check { display: flex; align-items: center; gap: 8px; color: var(--text); cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: #c9a24d; }
+
+/* ------------------------------------------------------------ danh sách */
+.wc-row { padding: 7px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.wc-row.selectable { cursor: pointer; }
+.wc-row.selectable:hover { background: rgba(201, 162, 77, 0.07); }
+.wc-row.selected { background: rgba(201, 162, 77, 0.15); box-shadow: inset 2px 0 0 var(--gold); }
+
+.swatch { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); flex: none; }
+
+kbd {
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--btn-text);
+  background: #121a2e;
+  border: 1px solid var(--line-dim);
+  border-bottom-color: var(--line);
+  padding: 0 6px;
+}
+
+.modal-back { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, 0.6); display: grid; place-items: center; }
+.modal { width: min(440px, 92vw); }
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #07090d; }
+::-webkit-scrollbar-thumb { background: #2a2f3a; border: 2px solid #07090d; }
+::-webkit-scrollbar-thumb:hover { background: #3a4150; }
