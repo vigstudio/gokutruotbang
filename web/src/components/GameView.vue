@@ -278,7 +278,12 @@ async function boot() {
   window.addEventListener('resize', resize)
   window.addEventListener('resize', checkOrientation)
   checkOrientation()
-  if (isMobile.value) setFollow(true)
+  if (isMobile.value) {
+    // điện thoại: Goku ở giữa vùng chơi (không chừa chỗ cho thanh điều khiển máy tính) và to hơn
+    setFollow(true)
+    r.viewOffsetY = -12
+    r.zoom = 0.82
+  }
   window.addEventListener('keydown', onKey)
   window.addEventListener('keyup', onKeyUp)
   let renderErr = false

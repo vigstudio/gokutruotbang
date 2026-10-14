@@ -31,8 +31,22 @@ export function setQuality(q: Quality) {
   }
 }
 
+/** Điện thoại / máy tính bảng: màn nhỏ nhưng mật độ điểm ảnh cao. */
+const PHONE = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 900
+
 export function settings(q: Quality = getQuality()): QualitySettings {
   const dpr = window.devicePixelRatio || 1
+  // màn điện thoại nhỏ (ít điểm ảnh CSS) nhưng dpr 2-3: vẽ dưới 1x sẽ rất nhoè,
+  // nên giữ tối thiểu ~1.5x (vẫn ít điểm ảnh hơn một màn máy tính)
+  if (PHONE) {
+    const f = q === 'low' ? 0.75 : q === 'medium' ? 0.9 : 1
+    const base = settingsFor(q, dpr)
+    return { ...base, pixelRatio: Math.min(dpr, 2) * f }
+  }
+  return settingsFor(q, dpr)
+}
+
+function settingsFor(q: Quality, dpr: number): QualitySettings {
   // Mọi mức đều bật bóng đổ PCF thường: đổi mức chỉ đổi độ phân giải và cỡ
   // shadow map, không phải biên dịch lại shader (trước đây gây đứng hình ~2 giây).
   switch (q) {

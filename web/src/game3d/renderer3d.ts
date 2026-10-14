@@ -428,8 +428,10 @@ export class Renderer3D {
       this.camY += (ty - this.camY) * 0.15
     }
     const b = this.info.m.bounds
-    this.camX = Math.max(b.minX, Math.min(b.maxX, this.camX))
-    this.camY = Math.max(b.minY - 600, Math.min(b.maxY - 300, this.camY))
+    // cho camera ra quá mép bản đồ một chút để Goku luôn nằm giữa màn hình
+    // (điểm xuất phát nằm sát mép trên)
+    this.camX = Math.max(b.minX - 300, Math.min(b.maxX + 300, this.camX))
+    this.camY = Math.max(b.minY - 600, Math.min(b.maxY + 250, this.camY))
     this.placeCamera()
 
     const t = now / 1000
