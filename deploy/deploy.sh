@@ -25,6 +25,8 @@ echo "==> Build và khởi động"
 ssh "$HOST" bash -s <<REMOTE
 set -euo pipefail
 cd $DIR
+# xoá mã nguồn cũ để file đã bị xoá ở bản mới không còn sót lại
+rm -rf server web
 tar -xzf /tmp/goku-deploy.tgz && rm -f /tmp/goku-deploy.tgz
 if [ ! -f .env ]; then
   cp .env.example .env
