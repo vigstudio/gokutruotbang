@@ -29,7 +29,7 @@ Trình duyệt (Vue 3 + three.js)                 Máy chủ (Go)
 ┌─────────────────────────────┐   WebSocket   ┌──────────────────────────────┐
 │ dự đoán vị trí Goku của mình│ ◄───────────► │ mô phỏng trận 50 tick/giây   │
 │ nội suy người chơi khác/rồng│   lệnh  ►     │ snapshot 25 lần/giây,        │
-│ vẽ 3D, HUD, âm thanh        │   ◄ snapshot  │ riêng cho từng người chơi    │
+│ vẽ 3D, HUD, nhạc nền        │   ◄ snapshot  │ riêng cho từng người chơi    │
 └─────────────────────────────┘               │ phòng, tài khoản, chống spam │
                                               └──────┬──────────────┬────────┘
                                                      │              │
@@ -146,7 +146,7 @@ Nếu đặt domain sau CDN/proxy, cần kiểm tra độ trễ WebSocket: proxy
 | S | Dừng đi bộ |
 | Space / mũi tên / lăn chuột | Camera theo Goku / di chuyển camera / phóng to, thu nhỏ |
 | Enter | Chat (chủ phòng gõ `-kick p2` để mời Goku 2 ra) |
-| F1 / F10 | Hướng dẫn / Menu (chọn chất lượng đồ hoạ) |
+| F1 / F10 | Hướng dẫn / Menu (âm lượng nhạc, chất lượng đồ hoạ) |
 
 Trên điện thoại: cần gạt bên trái để đi hoặc đổi hướng trượt; kỹ năng xếp vòng cung bên phải, kéo E/A để ngắm, kéo vào ô **Hủy** để huỷ; ô đồ và nút cửa hàng ở giữa phía dưới.
 
@@ -162,6 +162,7 @@ cd server && go run ./cmd/mapconv -in "../Goku truot bang v2.2.w3x" -out interna
 
 - **Map gốc, model Goku và rồng:** từ map *Goku truot bang* của **vietnghiavnn**.
 - **Texture và HDRI:** [Poly Haven](https://polyhaven.com) (CC0).
+- **Nhạc nền:** [Wintery Loop](https://opengameart.org/content/wintery-loop) (trang chủ) và [Determined Pursuit](https://opengameart.org/content/determined-pursuit-epic-orchestra-loop) (trong trận) của Emma_MA trên OpenGameArt (CC0).
 - **Icon:** [game-icons.net](https://game-icons.net) (CC BY 3.0), tác giả Lorc và Delapouite.
 - **Phông chữ:** Philosopher và Be Vietnam Pro (Google Fonts, SIL Open Font License).
 - **Model Goku ở trang chủ:** [Goku Ultra Instinct](https://sketchfab.com/3d-models/goku-ultra-instinct-cf9e76bde83e4d398154acb3abc7961f) của AKIN trên Sketchfab. Tác giả chưa công bố giấy phép cho phép tải về và phân phối lại, nên file model (`web/public/assets/menu/goku_ui.glb`) không nằm trong repository. Khi thiếu file này, trang chủ tự dùng model Goku gốc của map.

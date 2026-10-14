@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { store } from './net'
 import Auth from './components/Auth.vue'
 import Lobby from './components/Lobby.vue'
 import RoomLobby from './components/RoomLobby.vue'
 import GameView from './components/GameView.vue'
 import MenuScene from './components/MenuScene.vue'
+import SoundButton from './components/SoundButton.vue'
+import { playMusic } from './audio/music'
 
 const screen = computed(() => {
   if (!store.loggedIn) return 'auth'
   if (!store.room) return 'lobby'
   return store.room.state === 'game' ? 'game' : 'room'
 })
+watch(screen, (s) => playMusic(s === 'game' ? 'game' : 'menu'), { immediate: true })
 </script>
 
 <template>
@@ -33,11 +36,13 @@ const screen = computed(() => {
       <span>Map gốc: vietnghiavnn · Icon: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0, Lorc &amp; Delapouite) · Texture/HDRI/model: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0)</span>
     </div>
     <div v-if="store.error" class="err iron">{{ store.error }}</div>
+    <SoundButton class="menu-sound" />
   </div>
 </template>
 
 <style scoped>
 .menu { position: relative; height: 100%; overflow: hidden; }
+.menu-sound { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); bottom: 26px; }
 .vignette { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 220px 60px rgba(0, 0, 0, 0.85); }
 .logo {
   position: absolute;

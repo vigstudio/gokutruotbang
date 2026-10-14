@@ -10,6 +10,8 @@ import type { AbilityDef, GameEvent } from '../types'
 import { getQuality, type Quality } from '../game3d/quality'
 import InventoryBar from './InventoryBar.vue'
 import MobileControls from './MobileControls.vue'
+import SoundButton from './SoundButton.vue'
+import { music, setVolume } from '../audio/music'
 import ShopPanel from './ShopPanel.vue'
 import { catalog, itemDef, loadCatalog, shopNear } from '../game/items'
 import { itemIconUrl } from '../game/icons'
@@ -720,6 +722,7 @@ const dragonCount = computed(() => (snap.value, minimapDragons.list.length || (s
         <button class="top-btn" :class="{ on: helpOpen }" @click="helpOpen = !helpOpen">Trợ giúp <kbd>F1</kbd></button>
         <button v-if="isMobile" class="top-btn mob-only" :class="{ on: boardOpen }" @click="boardOpen = !boardOpen">Bảng điểm</button>
         <button v-if="isMobile" class="top-btn mob-only" title="Toàn màn hình" @click="goFullscreen">⛶</button>
+        <SoundButton class="top-sound" />
       </div>
       <div v-if="snap" class="round-plate">
         <span class="gold">Vòng {{ Math.min(snap.round, snap.final) }}</span><span class="muted">/{{ snap.final }}</span>
@@ -740,6 +743,10 @@ const dragonCount = computed(() => (snap.value, minimapDragons.list.length || (s
         <h2>Menu</h2>
         <button class="tft-btn" @click="menuOpen = false">Trở lại trò chơi</button>
         <button class="tft-btn" @click="((helpOpen = true), (menuOpen = false))">Hướng dẫn</button>
+        <div class="gfx">
+          <span class="wc-label">Nhạc nền <span class="muted">· {{ music.muted ? 'tắt' : Math.round(music.volume * 100) + '%' }}</span></span>
+          <input class="vol" type="range" min="0" max="1" step="0.05" :value="music.muted ? 0 : music.volume" @input="setVolume(Number(($event.target as HTMLInputElement).value))" />
+        </div>
         <div class="gfx">
           <span class="wc-label">Đồ hoạ <span class="muted">· {{ fps }} FPS</span></span>
           <div class="gfx-row">
@@ -994,6 +1001,8 @@ canvas { display: block; }
 .ping { font-size: 13px; color: #8fe08f; }
 .ping.bad { color: #ff8a5a; }
 
+.top-sound { margin-left: 2px; }
+.vol { width: 100%; accent-color: #c9a24d; }
 .fps {
   display: flex; align-items: baseline; gap: 4px; padding: 2px 8px; font: 600 12px var(--body); color: var(--muted);
   background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer;
