@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { crystalGeometry, crystalMaterial, lightBeam, makeLights, makeSky, pineGeometry, radialTexture, Snowfall } from '../game3d/env'
 import { W3Model } from '../game3d/w3model'
 import { KiAura } from '../game3d/aura'
+import { UltraAura } from '../game3d/ultraAura'
 import { loadProAssets } from '../game3d/proassets'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
@@ -17,6 +18,17 @@ import { fetchRetry } from '../fetchRetry'
  * web/public/assets/menu/goku.glb (cần đúng giấy phép của tác giả).
  * Không có file thì dùng model gốc của map.
  */
+/** Trọng số cú cận (0 = toàn cảnh, 1 = cận) theo chu kỳ 30 giây: 16s toàn cảnh,
+ *  2s đẩy vào, 10s cận, 2s kéo ra. */
+function closeWeight(t: number) {
+  const p = t % 30
+  const ease = (x: number) => x * x * (3 - 2 * x)
+  if (p < 16) return 0
+  if (p < 18) return ease((p - 16) / 2)
+  if (p < 28) return 1
+  return ease(1 - (p - 28) / 2)
+}
+
 // Goku Ultra Instinct (bản nén từ Sketchfab); ?ss3 để xem lại bản Super Saiyan 3
 const MENU_MODEL = new URLSearchParams(location.search).has('ss3') ? '/assets/menu/goku.glb' : '/assets/menu/goku_ui.glb'
 const UI = MENU_MODEL.endsWith('goku_ui.glb')
@@ -304,9 +316,21 @@ onMounted(async () => {
   const GX = -520
   const GY = -620
   const GZ = 64
-  const aura = new KiAura(330, MENU_MODEL.endsWith('goku_ui.glb'))
+  const aura = new KiAura(330, UI)
   aura.group.position.set(GX, GY, GZ)
   scene.add(aura.group)
+  // Ultra Instinct: hào quang lửa anime + sấm sét bám theo ngực nhân vật
+  const ultra = UI ? new UltraAura(560) : null
+  if (ultra) {
+    aura.minimal()
+    scene.add(ultra.group)
+  }
+  // điểm nhìn của camera cận (toạ độ riêng của model: giữa mặt và ngực)
+  const LOOK = new THREE.Vector3(-20, -20, 142)
+  // hướng quay của Goku khi cận cảnh (độ) và độ lệch khung hình sang trái
+  const YAW = Number(DBG.get('yaw') ?? 60)
+  const SHIFT = Number(DBG.get('shift') ?? 0.14)
+  const CHEST = new THREE.Vector3(-12, -9, 128)
 
   const snow = new Snowfall(3000, 5000, 2500)
   if (!DBG.has('nosnow')) scene.add(snow.points)
@@ -336,6 +360,8 @@ onMounted(async () => {
       rim.target = c.obj
       scene.add(key, fill, rim)
       scene.add(c.obj)
+      // ?dbg: mở đối tượng cảnh ra console để căn chỉnh camera / hiệu ứng
+      if (DBG.has('dbg')) (window as unknown as Record<string, unknown>).__menu = { THREE, camera, scene, renderer: r, goku: c.obj }
     } else if (!dbg.has('nogoku')) {
       W3Model.load(gl, 'war3mapImported/zMidouz.mdx').then((m) => (goku = m)).catch(() => {})
     }
@@ -359,7 +385,38 @@ onMounted(async () => {
     const dt = Math.min(0.1, (now - prev) / 1000)
     prev = now
     // camera trôi chậm
-    if (DBG.has('closeup')) {
+    if (UI && custom && !DBG.has('closeup')) {
+      // chuỗi cú máy: lượn toàn cảnh -> đẩy vào cận nửa thân trên -> kéo ra
+      const base = (246 * Math.PI) / 180
+      const o = custom.obj
+      const portrait = camera.aspect < 1
+      const c = DBG.has('wide') ? 0 : DBG.has('close') ? 1 : closeWeight(t)
+      // cú toàn cảnh
+      const thW = base + Math.sin(t * 0.085) * 1.15
+      const R = 820 + Math.sin(t * 0.13 + 1) * 240
+      // cú cận (lượn hẹp hơn, đẩy vào kéo ra, rung tay máy)
+      const thC = base + Math.sin(t * 0.11) * 0.42
+      const th = thW + (thC - thW) * c
+      o.rotation.z = (120 * Math.PI) / 180 + ((YAW - 120) * Math.PI / 180) * c + (th - base) * 0.9
+      o.position.z = GZ + 40 + Math.sin(t * 1.6) * 10
+      o.updateMatrixWorld(true)
+      const T = o.localToWorld(LOOK.clone())
+      const D = (portrait ? 420 : 300) + Math.sin(t * 0.17) * 55
+      const wide = new THREE.Vector3(GX + Math.cos(thW) * R, GY + Math.sin(thW) * R, GZ + 230 + Math.sin(t * 0.1) * 150)
+      const close = new THREE.Vector3(T.x + Math.cos(thC) * D, T.y + Math.sin(thC) * D, T.z - 25 + Math.sin(t * 0.13) * 30)
+      close.add(new THREE.Vector3(Math.sin(t * 1.9) * 2.5 + Math.sin(t * 4.7) * 0.8, Math.sin(t * 2.3) * 2.5, Math.sin(t * 1.3) * 2))
+      camera.position.copy(wide).lerp(close, c)
+      // điểm nhìn: toàn cảnh nhìn cả người (đẩy Goku sang trái, bảng menu bên phải), cận nhìn mặt-ngực
+      const fwd = new THREE.Vector3(GX - camera.position.x, GY - camera.position.y, 0).normalize()
+      const right = new THREE.Vector3(fwd.y, -fwd.x, 0)
+      const wideShift = portrait ? 0 : props.focus === 'center' ? -R * 0.04 : R * 0.2
+      const closeShift = portrait ? 0 : props.focus === 'center' ? 0 : D * SHIFT
+      const lookW = new THREE.Vector3(GX + right.x * wideShift, GY + right.y * wideShift, GZ + (portrait ? -70 : 175) + Math.sin(t * 0.2) * 20)
+      const lookC = new THREE.Vector3(T.x + right.x * closeShift, T.y + right.y * closeShift, T.z + (portrait ? -95 : 0))
+      camera.lookAt(lookW.lerp(lookC, c))
+      camera.fov = 46 + Math.sin(t * 0.11) * 3 + (40 - 46) * c
+      camera.updateProjectionMatrix()
+    } else if (DBG.has('closeup')) {
       camera.position.set(-520 - 300, -620 - 700, 260)
       camera.lookAt(-520, -620, 160)
     } else {
@@ -392,6 +449,7 @@ onMounted(async () => {
     snow.update(dt, camera.position.x, camera.position.y + 1200, t)
     custom?.mixer?.update(dt)
     aura.update(t, dt)
+    if (ultra && custom) ultra.update(t, dt, camera, custom.obj.localToWorld(CHEST.clone()), 115)
     r.render(scene, camera)
 
     if (goku || dragon) {

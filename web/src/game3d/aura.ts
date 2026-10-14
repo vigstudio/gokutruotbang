@@ -217,6 +217,11 @@ export class KiAura {
     this.group.add(this.light)
   }
 
+  /** Chỉ giữ hạt khí, sao lấp lánh và đèn (khi dùng hào quang anime riêng). */
+  minimal() {
+    this.shell.visible = this.shell2.visible = this.bolts.visible = this.ground.visible = false
+  }
+
   update(t: number, dt: number) {
     ;(this.shell.material as THREE.ShaderMaterial).uniforms.uTime.value = t
     ;(this.shell2.material as THREE.ShaderMaterial).uniforms.uTime.value = t * 1.2 + 10

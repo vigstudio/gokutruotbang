@@ -18,11 +18,15 @@ tar --exclude='web/node_modules' --exclude='web/dist' --exclude='*.exe' \
     -czf "$PKG" Dockerfile docker-compose.yml .env.example .dockerignore server web
 
 echo "==> Tải lên $HOST:$DIR"
-ssh "$HOST" "mkdir -p $DIR"
-scp -q "$PKG" "$HOST:/tmp/goku-deploy.tgz"
+# mạng tới máy chủ đôi khi ngắt giữa chừng: thử lại vài lần
+for try in 1 2 3; do
+  if ssh -o ServerAliveInterval=15 "$HOST" "mkdir -p $DIR && cat > /tmp/goku-deploy.tgz" < "$PKG"; then break; fi
+  [ "$try" = 3 ] && { echo "Tải lên thất bại"; exit 1; }
+  echo "   tải lên lỗi, thử lại ($try)..."; sleep 5
+done
 
 echo "==> Build và khởi động"
-ssh "$HOST" bash -s <<REMOTE
+ssh -o ServerAliveInterval=15 "$HOST" bash -s <<REMOTE
 set -euo pipefail
 cd $DIR
 # xoá mã nguồn cũ để file đã bị xoá ở bản mới không còn sót lại
