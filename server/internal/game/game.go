@@ -93,6 +93,8 @@ type Dragon struct {
 	idle   float64
 }
 
+type blocker struct{ X, Y, R float64 }
+
 type Marker struct { // n00D "Goku Zone" - chỗ đồng đội chết
 	Slot int
 	X, Y float64
@@ -147,6 +149,7 @@ type Game struct {
 	nextBox float64
 
 	starts      map[int][2]float64
+	blockers    []blocker // vật trang trí chặn đường (pha lê, cột băng...)
 	guards      map[string]mapdata.Rect
 	checkpoints []mapdata.Rect
 }
@@ -174,6 +177,15 @@ func New(m *mapdata.Map, players map[int]string, seed int64) *Game {
 		g.checkpoints = append(g.checkpoints, m.Regions[fmt.Sprintf("Lvl%d", i)])
 	}
 
+	for _, d := range m.Doodads {
+		if r := DoodadBlockRadius[d.Type]; r > 0 {
+			sc := d.Scale
+			if sc <= 0 {
+				sc = 1
+			}
+			g.blockers = append(g.blockers, blocker{d.X, d.Y, r * sc})
+		}
+	}
 	for _, u := range m.Units {
 		switch u.Type {
 		case "E000":
@@ -492,9 +504,37 @@ func (g *Game) tileAt(x, y float64) string {
 
 func (g *Game) canStand(x, y float64) bool {
 	m := g.m
-	return m.Walkable(x, y) &&
+	if !(m.Walkable(x, y) &&
 		m.Walkable(x+HeroRadius, y) && m.Walkable(x-HeroRadius, y) &&
-		m.Walkable(x, y+HeroRadius) && m.Walkable(x, y-HeroRadius)
+		m.Walkable(x, y+HeroRadius) && m.Walkable(x, y-HeroRadius)) {
+		return false
+	}
+	for _, b := range g.blockers {
+		if dx, dy := x-b.X, y-b.Y; dx*dx+dy*dy < (b.R+HeroRadius)*(b.R+HeroRadius) {
+			return false
+		}
+	}
+	return true
+}
+
+// pushOut: Goku lỡ nằm trong vòng chặn của vật trang trí (vd hồi sinh tại
+// đó) thì bị đẩy ra mép vòng chặn, theo hướng từ tâm vật ra.
+func (g *Game) pushOut(h *Hero) {
+	for _, b := range g.blockers {
+		dx, dy := h.X-b.X, h.Y-b.Y
+		d := math.Hypot(dx, dy)
+		min := b.R + HeroRadius
+		if d >= min {
+			continue
+		}
+		if d < 1e-6 {
+			dx, dy, d = 1, 0, 1
+		}
+		nx, ny := b.X+dx/d*(min+0.5), b.Y+dy/d*(min+0.5)
+		if g.m.Walkable(nx, ny) {
+			h.X, h.Y = nx, ny
+		}
+	}
 }
 
 // step di chuyển có chặn tường. SetUnitPosition trong WC3 đẩy unit về điểm
@@ -573,6 +613,7 @@ func (g *Game) tickHero(h *Hero, dt float64) {
 		}
 	}
 
+	g.pushOut(h)
 	g.sideGuards(h)
 	g.checkpointsFor(h)
 	g.pickBoxes(h)
@@ -685,8 +726,21 @@ func (g *Game) tickDragon(d *Dragon, dt float64) {
 }
 
 // Awan (Wander) + Wolf_Area_*: đi lang thang ngẫu nhiên trong vùng của mình.
+// Vùng tuần tra gốc không phủ sát mép tường nên dải sát mép thành chỗ trốn an
+// toàn; vì vậy vùng được nới tới sát tường và thỉnh thoảng rồng lao thẳng ra
+// mép đường. Điểm đến luôn phải là băng (rồng không lên ô đá an toàn).
 func (g *Game) pickWander(d *Dragon) {
 	r := d.home
+	r.MinX -= dragonHomeMargin
+	r.MinY -= dragonHomeMargin
+	r.MaxX += dragonHomeMargin
+	r.MaxY += dragonHomeMargin
+	if mapdata.Contains(r, d.X, d.Y) && g.rng.Float64() < dragonEdgeChance {
+		if x, y, ok := g.edgeTarget(d, r); ok {
+			d.tx, d.ty, d.moving = x, y, true
+			return
+		}
+	}
 	for i := 0; i < 8; i++ {
 		var x, y float64
 		if mapdata.Contains(r, d.X, d.Y) {
@@ -698,12 +752,36 @@ func (g *Game) pickWander(d *Dragon) {
 			x = r.MinX + g.rng.Float64()*(r.MaxX-r.MinX)
 			y = r.MinY + g.rng.Float64()*(r.MaxY-r.MinY)
 		}
-		if g.m.Walkable(x, y) {
+		if g.m.Walkable(x, y) && g.tileAt(x, y) == IceTile {
 			d.tx, d.ty, d.moving = x, y, true
 			return
 		}
 	}
 	d.idle = 0.5
+}
+
+// edgeTarget: đi thẳng theo một trong 4 hướng (đường trong map chạy dọc/ngang)
+// tới sát tường, dừng cách tường vài đơn vị.
+func (g *Game) edgeTarget(d *Dragon, r mapdata.Rect) (float64, float64, bool) {
+	dirs := [4][2]float64{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
+	k := g.rng.Intn(4)
+	for n := 0; n < 4; n++ {
+		dx, dy := dirs[(k+n)%4][0], dirs[(k+n)%4][1]
+		x, y := d.X, d.Y
+		for s := 0.0; s < DragonWanderMx*2; s += 12 {
+			nx, ny := x+dx*12, y+dy*12
+			if !g.m.Walkable(nx, ny) || g.tileAt(nx, ny) != IceTile || !mapdata.Contains(r, nx, ny) {
+				break
+			}
+			x, y = nx, ny
+		}
+		// phải đi được một đoạn và dừng ngay sát tường (không phải ô đá an toàn / hết vùng)
+		wx, wy := x+dx*12, y+dy*12
+		if math.Hypot(x-d.X, y-d.Y) > 60 && !g.m.Walkable(wx, wy) {
+			return x - dx*4, y - dy*4, true
+		}
+	}
+	return 0, 0, false
 }
 
 func (g *Game) tickThaws() {

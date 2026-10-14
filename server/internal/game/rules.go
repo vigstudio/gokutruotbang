@@ -21,13 +21,16 @@ const (
 	KillRange   = 60.0
 	ReviveRange = 70.0 // P1_Revive
 
-	DragonSpeed    = 300.0
-	DragonHP       = 500.0
-	BigDragonHP    = 1000.0
-	DragonKillXP   = 25
-	BigDragonXP    = 100
-	DragonWanderMn = 150.0
-	DragonWanderMx = 650.0
+	DragonSpeed = 300.0
+	// rồng: nới vùng tuần tra tới sát tường + tỉ lệ chủ động lao ra mép đường
+	dragonHomeMargin = 320.0
+	dragonEdgeChance = 0.4
+	DragonHP         = 500.0
+	BigDragonHP      = 1000.0
+	DragonKillXP     = 25
+	BigDragonXP      = 100
+	DragonWanderMn   = 150.0
+	DragonWanderMx   = 650.0
 
 	MaxHeroLevel = 14 // war3mapMisc.txt MaxHeroLevel
 	FinalRound   = 4  // Win: khi udg_Round == 5
@@ -183,4 +186,17 @@ const (
 var PlayerColors = []string{
 	"#ff0303", "#0042ff", "#1ce6b9", "#540081", "#fffc01", "#fe8a0e",
 	"#20c000", "#e55bb0", "#959697", "#7ebff1", "#106246", "#4e2a04",
+}
+
+// DoodadBlockRadius: bán kính chặn đường của vật trang trí (theo kích thước
+// hiển thị, nhân với scale của doodad). 0 = không chặn (vd vòng trang trí).
+// Client (web/src/game/predict.ts) dùng đúng bảng này để dự đoán khớp server.
+var DoodadBlockRadius = map[string]float64{
+	"IOst": 34, // cụm pha lê lớn ở góc đường
+	"NRic": 24, // tảng băng
+	// IWbg (tinh thể nhỏ) không chặn: 64 viên xếp thành vạch đích Next_Round
+	"IOob": 20, // cột băng
+	"YOfb": 24, // bát lửa
+	"D000": 18,
+	"ITig": 18,
 }

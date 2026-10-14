@@ -9,6 +9,10 @@ const HERO_BASE_SPEED = 350
 const HERO_RADIUS = 10
 export const TICK = 1 / 50
 
+// Bán kính chặn đường của vật trang trí - giống DoodadBlockRadius trên server
+// (server/internal/game/rules.go). IWbg không chặn vì là vạch đích.
+const DOODAD_BLOCK: Record<string, number> = { IOst: 34, NRic: 24, IOob: 20, YOfb: 24, D000: 18, ITig: 18 }
+
 interface Guard {
   name: string
   minX: number
@@ -39,9 +43,14 @@ export class Predictor {
   lastSent = 0 // seq của lệnh cuối cùng đã gửi
   private inGuard = new Map<string, boolean>()
   private guards: Guard[] = []
+  private blockers: { x: number; y: number; r: number }[] = []
   private history = new Map<number, [number, number]>()
 
   constructor(private info: MapInfo) {
+    for (const d of info.m.doodads ?? []) {
+      const r = DOODAD_BLOCK[d.type]
+      if (r) this.blockers.push({ x: d.x, y: d.y, r: r * (d.scale || 1) })
+    }
     for (const [name, r] of Object.entries(info.m.regions)) {
       if (!name.startsWith('SideGuard')) continue
       this.guards.push({ name, ...r, horizontal: name.startsWith('SideGuardTop') || name.startsWith('SideGuardBottom') })
@@ -55,7 +64,34 @@ export class Predictor {
   }
   private canStand(x: number, y: number) {
     const r = HERO_RADIUS
-    return this.walkable(x, y) && this.walkable(x + r, y) && this.walkable(x - r, y) && this.walkable(x, y + r) && this.walkable(x, y - r)
+    if (!(this.walkable(x, y) && this.walkable(x + r, y) && this.walkable(x - r, y) && this.walkable(x, y + r) && this.walkable(x, y - r))) return false
+    for (const b of this.blockers) {
+      const dx = x - b.x
+      const dy = y - b.y
+      if (dx * dx + dy * dy < (b.r + r) * (b.r + r)) return false
+    }
+    return true
+  }
+  /** Bị kẹt trong vòng chặn của vật trang trí thì đẩy ra mép (giống game.pushOut). */
+  private pushOut() {
+    for (const b of this.blockers) {
+      let dx = this.x - b.x
+      let dy = this.y - b.y
+      let d = Math.hypot(dx, dy)
+      const min = b.r + HERO_RADIUS
+      if (d >= min) continue
+      if (d < 1e-6) {
+        dx = 1
+        dy = 0
+        d = 1
+      }
+      const nx = b.x + (dx / d) * (min + 0.5)
+      const ny = b.y + (dy / d) * (min + 0.5)
+      if (this.walkable(nx, ny)) {
+        this.x = nx
+        this.y = ny
+      }
+    }
   }
   private step(x: number, y: number, dx: number, dy: number): [number, number] {
     if (this.canStand(x + dx, y + dy)) return [x + dx, y + dy]
@@ -121,6 +157,7 @@ export class Predictor {
         this.y = ny
       }
     }
+    this.pushOut()
     for (const g of this.guards) {
       const inside = this.x >= g.minX && this.x <= g.maxX && this.y >= g.minY && this.y <= g.maxY
       if (inside && !this.inGuard.get(g.name)) {

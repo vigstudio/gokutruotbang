@@ -111,7 +111,7 @@ export function buildWorld(info: MapInfo, pro: ProAssets, qs: QualitySettings): 
     if (e <= 0) return 0
     const deep = smooth(0.55, 1, ws.deep(x, y))
     const rock = (fbm(x / 70 + 9, y / 70) - 0.5) * 40
-    return e * (34 + rock * 0.4 + deep * (150 + fbm(x / 400, y / 400) * 240))
+    return e * (88 + rock * 0.6 + deep * (160 + fbm(x / 400, y / 400) * 240))
   }
 
   // ---------------------------------------------------------------- địa hình
