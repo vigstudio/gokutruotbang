@@ -11,7 +11,8 @@ import { getQuality, type Quality } from '../game3d/quality'
 import InventoryBar from './InventoryBar.vue'
 import MobileControls from './MobileControls.vue'
 import SoundButton from './SoundButton.vue'
-import { music, setVolume } from '../audio/music'
+import { music, setSfxVolume, setVolume } from '../audio/music'
+import { playSfx, preloadSfx, setSlide, spatial, type SfxId } from '../audio/sfx'
 import ShopPanel from './ShopPanel.vue'
 import { catalog, itemDef, loadCatalog, shopNear } from '../game/items'
 import { itemIconUrl } from '../game/icons'
@@ -304,6 +305,7 @@ async function boot() {
       lastPortrait = t
       drawPortrait(t)
     }
+    updateSounds(t)
     if (t - lastCam > 200) {
       lastCam = t
       reportCamera()
@@ -321,6 +323,7 @@ async function boot() {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
+  setSlide(0, 0)
   offEvent?.()
   offSnap?.()
   window.removeEventListener('resize', resize)
@@ -328,8 +331,62 @@ onBeforeUnmount(() => {
   window.removeEventListener('keyup', onKeyUp)
 })
 
+// ---------------------------------------------------------------- hiệu ứng âm thanh
+const ROARS: SfxId[] = ['roar1', 'roar2', 'roar3']
+function sfxAt(id: SfxId, x: number, y: number, volume = 1, rate = 1) {
+  if (!r) return
+  const sp = spatial(x, y, r.camX, r.camY)
+  if (sp.volume > 0.02) playSfx(id, { volume: sp.volume * volume, pan: sp.pan, rate })
+}
+function eventSound(e: GameEvent) {
+  const mine = e.slot === mySlot()
+  const x = e.x ?? r?.camX ?? 0
+  const y = e.y ?? r?.camY ?? 0
+  switch (e.kind) {
+    case 'death': // bị rồng cắn trúng
+      if (mine) {
+        playSfx('bite', { volume: 1 })
+        playSfx(ROARS[Math.floor(Math.random() * 3)], { volume: 0.7, rate: 0.95 })
+      } else sfxAt('bite', x, y, 0.75)
+      break
+    case 'pickup':
+      if (mine) playSfx('pickup', { volume: 0.8 })
+      else sfxAt('pickup', x, y, 0.4)
+      break
+    case 'ball':
+      if (mine) playSfx('pickup', { volume: 1, rate: 1.35 })
+      break
+    case 'item':
+      if (mine) playSfx('pickup', { volume: 0.45, rate: 0.9 })
+      break
+    case 'shield':
+      sfxAt('bite', x, y, mine ? 0.5 : 0.3, 1.4)
+      break
+  }
+}
+// rồng thỉnh thoảng gầm (chọn ngẫu nhiên một con gần camera)
+let nextRoar = 0
+function ambientRoar(t: number) {
+  if (!r || t < nextRoar) return
+  nextRoar = t + 7000 + Math.random() * 8000
+  const list = (r.lastView?.dragons ?? []).filter((d) => Math.hypot(d[1] - r!.camX, d[2] - r!.camY) < 1800)
+  if (!list.length) return
+  const d = list[Math.floor(Math.random() * list.length)]
+  sfxAt(ROARS[Math.floor(Math.random() * 3)], d[1], d[2], d[4] ? 0.75 : 0.5, d[4] ? 0.8 : 0.9 + Math.random() * 0.2)
+}
+function updateSounds(t: number) {
+  if (!music.unlocked) return
+  preloadSfx()
+  const h = me.value
+  const playing = store.hud?.phase === 'playing'
+  const sliding = playing && !!pred?.alive && pred.onIce && (h?.h ?? 0) < 1
+  setSlide(sliding ? Math.min(1, 0.55 + ((pred?.speed ?? 350) * (pred?.realSpd ?? 1)) / 1400) : 0, t / 1000)
+  if (playing) ambientRoar(t)
+}
+
 function handleEvent(e: GameEvent) {
   r?.onEvent(e, performance.now())
+  eventSound(e)
   if (e.kind === 'go') {
     goFlash.value = true
     setTimeout(() => (goFlash.value = false), 1200)
@@ -746,6 +803,8 @@ const dragonCount = computed(() => (snap.value, minimapDragons.list.length || (s
         <div class="gfx">
           <span class="wc-label">Nhạc nền <span class="muted">· {{ music.muted ? 'tắt' : Math.round(music.volume * 100) + '%' }}</span></span>
           <input class="vol" type="range" min="0" max="1" step="0.05" :value="music.muted ? 0 : music.volume" @input="setVolume(Number(($event.target as HTMLInputElement).value))" />
+          <span class="wc-label">Hiệu ứng âm thanh <span class="muted">· {{ music.muted ? 'tắt' : Math.round(music.sfxVolume * 100) + '%' }}</span></span>
+          <input class="vol" type="range" min="0" max="1" step="0.05" :value="music.muted ? 0 : music.sfxVolume" @input="setSfxVolume(Number(($event.target as HTMLInputElement).value))" />
         </div>
         <div class="gfx">
           <span class="wc-label">Đồ hoạ <span class="muted">· {{ fps }} FPS</span></span>

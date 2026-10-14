@@ -1,4 +1,4 @@
-// Nhạc nền: Web Audio (lặp liền mạch, chuyển bài mờ dần), tự bật sau thao tác
+// Nhạc nền + kênh hiệu ứng âm thanh: Web Audio (lặp liền mạch, chuyển bài mờ dần), tự bật sau thao tác
 // đầu tiên của người chơi (trình duyệt chặn tự phát âm thanh trước đó), tạm
 // dừng khi ẩn tab, nhớ âm lượng / tắt tiếng.
 import { reactive } from 'vue'
@@ -23,35 +23,38 @@ const ENCODER_DELAY = 1105 / 44100
 const FADE = 1.2
 const KEY = 'goku.music'
 
-function loadSettings(): { volume: number; muted: boolean } {
+function loadSettings(): { volume: number; sfxVolume: number; muted: boolean } {
+  const def = { volume: 0.6, sfxVolume: 0.8, muted: false }
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? '')
-    if (typeof v.volume === 'number' && typeof v.muted === 'boolean') return v
+    if (typeof v.volume === 'number' && typeof v.muted === 'boolean') return { ...def, ...v }
   } catch {
     /* chưa lưu */
   }
-  return { volume: 0.6, muted: false }
+  return def
 }
 
 export const music = reactive({ ...loadSettings(), track: null as TrackId | null, unlocked: false })
 
 let ctx: AudioContext | null = null
-let master: GainNode | null = null
+let master: GainNode | null = null // nhạc nền
+let sfxBus: GainNode | null = null // hiệu ứng âm thanh
 const buffers = new Map<TrackId, Promise<AudioBuffer>>()
 let current: { id: TrackId; src: AudioBufferSourceNode; gain: GainNode } | null = null
 let wanted: TrackId | null = null
 
 function save() {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ volume: music.volume, muted: music.muted }))
+    localStorage.setItem(KEY, JSON.stringify({ volume: music.volume, sfxVolume: music.sfxVolume, muted: music.muted }))
   } catch {
     /* bỏ qua */
   }
 }
 
 function applyVolume() {
-  if (!ctx || !master) return
+  if (!ctx || !master || !sfxBus) return
   master.gain.setTargetAtTime(music.muted ? 0 : music.volume, ctx.currentTime, 0.08)
+  sfxBus.gain.setTargetAtTime(music.muted ? 0 : music.sfxVolume, ctx.currentTime, 0.08)
 }
 
 function buffer(id: TrackId) {
@@ -101,6 +104,8 @@ function unlock() {
   ctx = new AC()
   master = ctx.createGain()
   master.connect(ctx.destination)
+  sfxBus = ctx.createGain()
+  sfxBus.connect(ctx.destination)
   music.unlocked = true
   applyVolume()
   ctx.resume().catch(() => {})
@@ -127,6 +132,18 @@ export function setVolume(v: number) {
   if (music.volume > 0) music.muted = false
   applyVolume()
   save()
+}
+
+export function setSfxVolume(v: number) {
+  music.sfxVolume = Math.max(0, Math.min(1, v))
+  if (music.sfxVolume > 0) music.muted = false
+  applyVolume()
+  save()
+}
+
+/** Bộ âm thanh dùng chung cho hiệu ứng (null khi người chơi chưa thao tác lần nào). */
+export function audioOut(): { ctx: AudioContext; bus: GainNode } | null {
+  return ctx && sfxBus ? { ctx, bus: sfxBus } : null
 }
 
 export function toggleMute() {
