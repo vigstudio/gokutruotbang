@@ -164,7 +164,7 @@ cd server && go run ./cmd/mapconv -in "../Goku truot bang v2.2.w3x" -out interna
 - **Texture và HDRI:** [Poly Haven](https://polyhaven.com) (CC0).
 - **Icon:** [game-icons.net](https://game-icons.net) (CC BY 3.0), tác giả Lorc và Delapouite.
 - **Phông chữ:** Philosopher và Be Vietnam Pro (Google Fonts, SIL Open Font License).
-- **Model Goku ở trang chủ** (thư mục `web/public/assets/menu/*.glb`) không nằm trong repository vì không phân phối lại được. Khi thiếu file này, trang chủ tự dùng model Goku gốc của map.
+- **Model Goku ở trang chủ:** [Goku Ultra Instinct](https://sketchfab.com/3d-models/goku-ultra-instinct-cf9e76bde83e4d398154acb3abc7961f) của AKIN trên Sketchfab. Tác giả chưa công bố giấy phép cho phép tải về và phân phối lại, nên file model (`web/public/assets/menu/goku_ui.glb`) không nằm trong repository. Khi thiếu file này, trang chủ tự dùng model Goku gốc của map.
 
 Warcraft III là thương hiệu của Blizzard Entertainment. Dragon Ball là tác phẩm của Akira Toriyama / Shueisha / Toei Animation. Đây là dự án phi thương mại do người hâm mộ thực hiện.
 
